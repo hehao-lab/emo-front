@@ -1,12 +1,12 @@
 import { App, Button, Card, Form, Input, Typography } from "antd";
-import { LockKeyhole, UserRound } from "lucide-react";
+import { LockKeyhole, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../api/auth";
 import { readToken } from "../api/client";
 
 interface LoginForm {
-  username: string;
+  phone: string;
   password: string;
 }
 
@@ -27,8 +27,9 @@ export function LoginPage() {
       await login(values);
       message.success("登录成功");
       navigate("/", { replace: true });
-    } catch {
-      message.error("登录失败，请检查账号和密码");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      message.error(msg || "登录失败，请检查手机号和密码");
     } finally {
       setLoading(false);
     }
@@ -48,12 +49,11 @@ export function LoginPage() {
           <Typography.Title level={3}>登录</Typography.Title>
           <Form<LoginForm>
             layout="vertical"
-            initialValues={{ username: "admin", password: "admin123" }}
             onFinish={onFinish}
             requiredMark={false}
           >
-            <Form.Item name="username" label="账号" rules={[{ required: true, message: "请输入账号" }]}>
-              <Input prefix={<UserRound size={16} />} size="large" autoComplete="username" />
+            <Form.Item name="phone" label="手机号" rules={[{ required: true, message: "请输入手机号" }]}>
+              <Input prefix={<Phone size={16} />} size="large" autoComplete="username" />
             </Form.Item>
             <Form.Item name="password" label="密码" rules={[{ required: true, message: "请输入密码" }]}>
               <Input.Password

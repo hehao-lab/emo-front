@@ -1,4 +1,4 @@
-import { Card, Col, Row, Space, Table, Typography } from "antd";
+import { Card, Col, Empty, Row, Space, Spin, Table, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
   Activity,
@@ -14,56 +14,22 @@ import {
   UsersRound,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
+import { fetchOverview, fetchTrends } from "../api/dashboard";
+import { fetchAnalyses } from "../api/emotion";
 import { RiskTag } from "../components/StatusTags";
 import { StatCard } from "../components/StatCard";
-import { analyses, dailyTrend, emotionDistribution } from "../data/mock";
-import type { EmotionAnalysis } from "../types";
-
-const columns: ColumnsType<EmotionAnalysis> = [
-  {
-    title: "用户",
-    dataIndex: "username",
-    key: "username",
-    width: 120,
-  },
-  {
-    title: "风险",
-    dataIndex: "riskLevel",
-    key: "riskLevel",
-    width: 100,
-    render: (value) => <RiskTag value={value} />,
-  },
-  {
-    title: "主情绪",
-    dataIndex: "primaryEmotion",
-    key: "primaryEmotion",
-    width: 120,
-  },
-  {
-    title: "摘要",
-    dataIndex: "summary",
-    key: "summary",
-    ellipsis: true,
-  },
-  {
-    title: "时间",
-    dataIndex: "createdAt",
-    key: "createdAt",
-    width: 160,
-  },
-];
+import type { DashboardOverview, EmotionAnalysis, TrendPoint } from "../types";
 
 const modules: Array<{
   title: string;
@@ -81,8 +47,48 @@ const modules: Array<{
   { title: "文件资源", path: "/files", desc: "上传资源与文件状态", icon: <FileArchive size={24} />, tone: "orange" },
 ];
 
+function formatTrends(points: TrendPoint[]) {
+  return points.map((p) => ({
+    date: p.date.slice(5),
+    users: Number(p.newUsers),
+    diaries: Number(p.diaries),
+    analyses: Number(p.emotionAnalyses),
+    highRisk: 0,
+  }));
+}
+
 export function DashboardPage() {
   const navigate = useNavigate();
+  const [overview, setOverview] = useState<DashboardOverview | null>(null);
+  const [trends, setTrends] = useState<ReturnType<typeof formatTrends>>([]);
+  const [analyses, setAnalyses] = useState<EmotionAnalysis[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [ov, tr, an] = await Promise.all([
+          fetchOverview(),
+          fetchTrends("2026-06-25", "2026-07-03"),
+          fetchAnalyses({ pageSize: 10 }),
+        ]);
+        setOverview(ov);
+        setTrends(formatTrends(tr.points));
+        setAnalyses(an.analyses);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const riskColumns: ColumnsType<EmotionAnalysis> = [
+    { title: "用户", dataIndex: "username", key: "username", width: 120 },
+    { title: "风险", dataIndex: "riskLevel", key: "riskLevel", width: 100, render: (v) => <RiskTag value={v} /> },
+    { title: "主情绪", dataIndex: "primaryEmotion", key: "primaryEmotion", width: 120 },
+    { title: "摘要", dataIndex: "summary", key: "summary", ellipsis: true },
+    { title: "时间", dataIndex: "createdAt", key: "createdAt", width: 160 },
+  ];
 
   return (
     <div className="page-stack">
@@ -102,50 +108,28 @@ export function DashboardPage() {
         </Row>
       </Card>
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} xl={6}>
-          <StatCard
-            title="注册用户"
-            value="284"
-            note="+17 今日新增"
-            icon={<UsersRound size={22} />}
-            tone="blue"
-          />
-        </Col>
-        <Col xs={24} sm={12} xl={6}>
-          <StatCard
-            title="日记记录"
-            value="132"
-            note="+12 较昨日"
-            icon={<NotebookTabs size={22} />}
-            tone="green"
-          />
-        </Col>
-        <Col xs={24} sm={12} xl={6}>
-          <StatCard
-            title="AI 会话"
-            value="67"
-            note="18 个活跃中"
-            icon={<MessageCircle size={22} />}
-            tone="orange"
-          />
-        </Col>
-        <Col xs={24} sm={12} xl={6}>
-          <StatCard
-            title="高风险提醒"
-            value="9"
-            note="3 个待跟进"
-            icon={<AlertTriangle size={22} />}
-            tone="red"
-          />
-        </Col>
-      </Row>
+      <Spin spinning={loading}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} xl={6}>
+            <StatCard title="注册用户" value={overview?.userCount || "0"} note={`+${overview?.todayNewUsers || "0"} 今日新增`} icon={<UsersRound size={22} />} tone="blue" />
+          </Col>
+          <Col xs={24} sm={12} xl={6}>
+            <StatCard title="日记记录" value={overview?.diaryCount || "0"} note={`${overview?.todayDiaries || "0"} 今日`} icon={<NotebookTabs size={22} />} tone="green" />
+          </Col>
+          <Col xs={24} sm={12} xl={6}>
+            <StatCard title="AI 会话" value={overview?.chatSessionCount || "0"} note={`${overview?.todayChatMessages || "0"} 条今日消息`} icon={<MessageCircle size={22} />} tone="orange" />
+          </Col>
+          <Col xs={24} sm={12} xl={6}>
+            <StatCard title="高风险提醒" value={overview?.highRiskAnalysisCount || "0"} note={`${overview?.emotionAnalysisCount || "0"} 次分析`} icon={<AlertTriangle size={22} />} tone="red" />
+          </Col>
+        </Row>
+      </Spin>
 
       <Row gutter={[16, 16]}>
         <Col xs={24} xl={16}>
           <Card title="近 7 日业务趋势" className="chart-card">
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={dailyTrend}>
+              <AreaChart data={trends}>
                 <defs>
                   <linearGradient id="trendUsers" x1="0" x2="0" y1="0" y2="1">
                     <stop offset="5%" stopColor="#2563eb" stopOpacity={0.28} />
@@ -160,57 +144,21 @@ export function DashboardPage() {
                 <XAxis dataKey="date" tickLine={false} axisLine={false} />
                 <YAxis tickLine={false} axisLine={false} />
                 <Tooltip />
-                <Area type="monotone" dataKey="users" name="活跃用户" stroke="#2563eb" fill="url(#trendUsers)" />
-                <Area
-                  type="monotone"
-                  dataKey="analyses"
-                  name="情绪分析"
-                  stroke="#0f766e"
-                  fill="url(#trendAnalyses)"
-                />
+                <Area type="monotone" dataKey="users" name="新用户" stroke="#2563eb" fill="url(#trendUsers)" />
+                <Area type="monotone" dataKey="analyses" name="情绪分析" stroke="#0f766e" fill="url(#trendAnalyses)" />
               </AreaChart>
             </ResponsiveContainer>
           </Card>
         </Col>
         <Col xs={24} xl={8}>
-          <Card
-            title={
-              <Space>
-                <Activity size={18} />
-                情绪分布
-              </Space>
-            }
-            className="chart-card"
-          >
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={emotionDistribution}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="emotion" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} />
-                <Tooltip />
-                <Bar dataKey="count" name="数量" radius={[6, 6, 0, 0]} fill="#ea580c" />
-              </BarChart>
-            </ResponsiveContainer>
+          <Card title={<Space><Activity size={18} />情绪分布</Space>} className="chart-card">
+            <Empty description="待后端提供情绪分布接口" style={{ padding: 60 }} />
           </Card>
         </Col>
       </Row>
 
-      <Card
-        title={
-          <Space>
-            <AlertTriangle size={18} />
-            风险队列
-          </Space>
-        }
-        extra={<Typography.Text type="secondary">按风险等级与时间排序</Typography.Text>}
-      >
-        <Table<EmotionAnalysis>
-          rowKey="id"
-          columns={columns}
-          dataSource={analyses}
-          pagination={false}
-          scroll={{ x: 760 }}
-        />
+      <Card title={<Space><AlertTriangle size={18} />风险队列</Space>} extra={<Typography.Text type="secondary">按风险等级与时间排序</Typography.Text>}>
+        <Table<EmotionAnalysis> rowKey="id" columns={riskColumns} dataSource={analyses} pagination={false} scroll={{ x: 760 }} />
       </Card>
     </div>
   );

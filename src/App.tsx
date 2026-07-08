@@ -10,6 +10,7 @@ import { EmotionPage } from "./pages/EmotionPage";
 import { FilesPage } from "./pages/FilesPage";
 import { LoginPage } from "./pages/LoginPage";
 import { SecurityPage } from "./pages/SecurityPage";
+import { MoodTagsPage } from "./pages/MoodTagsPage";
 import { SystemPage } from "./pages/SystemPage";
 import { UsersPage } from "./pages/UsersPage";
 
@@ -54,6 +55,7 @@ export default function App() {
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/security" element={<SecurityPage />} />
               <Route path="/system" element={<SystemPage />} />
+              <Route path="/mood-tags" element={<MoodTagsPage />} />
               <Route path="/files" element={<FilesPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

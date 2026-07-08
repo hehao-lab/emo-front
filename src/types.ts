@@ -3,42 +3,51 @@ export type RiskLevel = "low" | "medium" | "high" | "crisis";
 export type Platform = "all" | "ios" | "android" | "web";
 
 export interface AdminUser {
-  id: number;
+  userId: string;
   username: string;
   phone: string;
   email: string;
-  nickname: string;
   avatar: string;
   roles: string[];
-  status: AccountStatus;
-  location: string;
+  status: number; // 1=正常 2=冻结 3=注销
   lastLoginAt: string;
   createdAt: string;
-  diaryCount: number;
-  chatCount: number;
-  riskLevel: RiskLevel;
+  updatedAt: string;
+  profile?: UserProfile;
+}
+
+export interface UserProfile {
+  nickname: string;
+  gender: string;
+  birthday: string;
+  bio: string;
+  location: string;
+  occupation: string;
+  industry: string;
+  language: string;
+  timezone: string;
 }
 
 export interface DiaryRecord {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   username: string;
   title: string;
   content: string;
   mood: string;
   moodScore: number;
-  riskLevel: RiskLevel;
-  tags: string[];
   occurredOn: string;
-  createdAt: string;
   visibility: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface EmotionAnalysis {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   username: string;
   sourceType: "diary" | "chat_message" | "manual";
+  sourceId: string;
   primaryEmotion: string;
   sentiment: "positive" | "neutral" | "negative";
   sentimentScore: number;
@@ -47,32 +56,33 @@ export interface EmotionAnalysis {
   depressionRiskScore: number;
   energyScore: number;
   confidence: number;
-  riskLevel: RiskLevel;
   summary: string;
   advice: string;
+  riskLevel: RiskLevel;
+  model: string;
   createdAt: string;
 }
 
 export interface ChatSession {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   username: string;
   title: string;
   scenario: string;
   status: "active" | "closed";
-  summary: string;
   messageCount: number;
   lastMessageAt: string;
-  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ChatMessage {
-  id: number;
+  id: string;
+  sessionId: string;
+  userId: string;
   role: "user" | "assistant" | "system";
   content: string;
-  model?: string;
-  latencyMs?: number;
-  totalTokens?: number;
+  contentType: string;
   status: "success" | "failed";
   createdAt: string;
 }
@@ -100,44 +110,106 @@ export interface SecurityEvent {
 }
 
 export interface SystemConfig {
-  id: number;
+  id: string;
   key: string;
-  value: string;
+  valueJson: string;
   description: string;
   isPublic: boolean;
+  createdAt: string;
   updatedAt: string;
 }
 
 export interface Announcement {
-  id: number;
+  id: string;
   title: string;
   content: string;
-  platform: Platform;
-  status: "enabled" | "disabled";
+  targetPlatform: Platform;
   startAt: string;
   endAt: string;
+  status: number; // 1=启用 0=停用
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AppVersion {
-  id: number;
+  id: string;
   platform: Exclude<Platform, "all">;
   version: string;
   buildNo: number;
   forceUpdate: boolean;
+  downloadUrl: string;
+  changelog: string;
   minSupportedVersion: string;
   publishedAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface FileAsset {
-  id: number;
-  ownerUserId: number;
-  ownerName: string;
+  id: string;
+  ownerUserId: string;
   bizType: string;
   storageProvider: string;
   objectKey: string;
   url: string;
   mimeType: string;
-  sizeBytes: number;
-  status: "normal" | "blocked";
+  sizeBytes: string;
+  status: number; // 1=正常 0=拦截
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface MoodTag {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  sort: number;
+  system: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DashboardOverview {
+  userCount: string;
+  todayNewUsers: string;
+  diaryCount: string;
+  todayDiaries: string;
+  chatSessionCount: string;
+  todayChatMessages: string;
+  emotionAnalysisCount: string;
+  highRiskAnalysisCount: string;
+}
+
+export interface TrendPoint {
+  date: string;
+  newUsers: string;
+  diaries: string;
+  chatMessages: string;
+  emotionAnalyses: string;
+}
+
+export interface PaginatedResponse<T> {
+  total: string;
+  [key: string]: T[] | string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+  userId: string;
+  username: string;
+  avatar: string;
+  roles: string[];
+}
+
+export interface RefreshResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+}
+
+export interface UserDetailResponse extends AdminUser {
+  profile?: UserProfile;
 }

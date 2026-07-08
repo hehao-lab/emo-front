@@ -25,12 +25,13 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  Tags,
   UserRoundCog,
 } from "lucide-react";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { clearSession } from "../api/client";
-import { readProfile } from "../api/auth";
+import { clearSession, readProfile } from "../api/client";
+import type { AdminProfile } from "../api/auth";
 
 const { Header, Sider, Content } = Layout;
 
@@ -42,6 +43,7 @@ const navLinks = [
   { key: "/chat", label: "聊天记录" },
   { key: "/security", label: "安全审计" },
   { key: "/system", label: "系统运营" },
+  { key: "/mood-tags", label: "心情标签" },
   { key: "/files", label: "文件资源" },
 ];
 
@@ -53,6 +55,7 @@ const navItems: MenuProps["items"] = [
   { key: "/chat", icon: <MessageSquareText size={18} />, label: "聊天记录" },
   { key: "/security", icon: <ShieldCheck size={18} />, label: "安全审计" },
   { key: "/system", icon: <Settings size={18} />, label: "系统运营" },
+  { key: "/mood-tags", icon: <Tags size={18} />, label: "心情标签" },
   { key: "/files", icon: <FileArchive size={18} />, label: "文件资源" },
 ];
 
@@ -64,13 +67,14 @@ const titleMap: Record<string, string> = {
   "/chat": "聊天记录",
   "/security": "安全审计",
   "/system": "系统运营",
+  "/mood-tags": "心情标签",
   "/files": "文件资源",
 };
 
 export function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
-  const profile = readProfile();
+  const profile = readProfile<AdminProfile>();
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer },
@@ -133,7 +137,7 @@ export function AppShell() {
               allowClear
             />
             <Tooltip title="风险提醒">
-              <Badge count={3} size="small">
+              <Badge count={0} size="small">
                 <Button icon={<Bell size={18} />} />
               </Badge>
             </Tooltip>
