@@ -25,13 +25,19 @@ const columns: ColumnsType<ChatSession> = [
     width: 100,
     render: (v) => <Tag color={v === "active" ? "processing" : "default"}>{v === "active" ? "活跃" : "关闭"}</Tag>,
   },
-  { title: "消息数", dataIndex: "messageCount", key: "messageCount", width: 100 },
+  {
+    title: "消息数",
+    dataIndex: "messageCount",
+    key: "messageCount",
+    width: 100,
+    render: (v?: number) => v ?? 0,
+  },
   {
     title: "最后消息",
     dataIndex: "lastMessageAt",
     key: "lastMessageAt",
     width: 160,
-    render: (v: string) => new Date(Number(v) * 1000).toLocaleString(),
+    render: (v?: string) => v && v !== "0" ? new Date(Number(v) * 1000).toLocaleString() : "-",
   },
 ];
 

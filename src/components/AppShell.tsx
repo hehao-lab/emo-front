@@ -30,7 +30,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { clearSession, readProfile } from "../api/client";
+import { logout } from "../api/auth";
+import { clearSession, readProfile, readRefreshToken } from "../api/client";
 import type { AdminProfile } from "../api/auth";
 
 const { Header, Sider, Content } = Layout;
@@ -148,9 +149,14 @@ export function AppShell() {
                     key: "logout",
                     icon: <LogOut size={16} />,
                     label: "退出登录",
-                    onClick: () => {
-                      clearSession();
-                      navigate("/login", { replace: true });
+                    onClick: async () => {
+                      const refreshToken = readRefreshToken();
+                      try {
+                        if (refreshToken) await logout(refreshToken);
+                      } finally {
+                        clearSession();
+                        navigate("/login", { replace: true });
+                      }
                     },
                   },
                 ],

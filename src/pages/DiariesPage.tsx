@@ -70,7 +70,7 @@ export function DiariesPage() {
       title: "心情",
       key: "mood",
       width: 120,
-      render: (_, record) => `${record.mood} ${record.moodScore}/10`,
+      render: (_, record) => `${record.mood} ${record.moodScore ?? 0}/10`,
     },
     {
       title: "可见性",
@@ -140,7 +140,7 @@ export function DiariesPage() {
               <span>用户</span>
               <strong>{selectedDiary.username}</strong>
               <span>心情</span>
-              <strong>{selectedDiary.mood} {selectedDiary.moodScore}/10</strong>
+              <strong>{selectedDiary.mood} {selectedDiary.moodScore ?? 0}/10</strong>
               <span>记录日期</span>
               <strong>{selectedDiary.occurredOn}</strong>
               <span>可见性</span>

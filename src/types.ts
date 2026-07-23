@@ -35,11 +35,18 @@ export interface DiaryRecord {
   title: string;
   content: string;
   mood: string;
-  moodScore: number;
+  moodScore?: number;
   occurredOn: string;
   visibility: string;
   createdAt: string;
   updatedAt: string;
+  tags?: MoodTag[];
+  attachmentUrls?: string[];
+}
+
+export interface EmotionDimensionScore {
+  dimension: string;
+  score: number;
 }
 
 export interface EmotionAnalysis {
@@ -61,6 +68,7 @@ export interface EmotionAnalysis {
   riskLevel: RiskLevel;
   model: string;
   createdAt: string;
+  dimensions?: EmotionDimensionScore[];
 }
 
 export interface ChatSession {
@@ -70,10 +78,11 @@ export interface ChatSession {
   title: string;
   scenario: string;
   status: "active" | "closed";
-  messageCount: number;
-  lastMessageAt: string;
+  messageCount?: number;
+  lastMessageAt?: string;
   createdAt: string;
   updatedAt: string;
+  summary?: string;
 }
 
 export interface ChatMessage {
@@ -88,7 +97,8 @@ export interface ChatMessage {
 }
 
 export interface LoginLog {
-  id: number;
+  id: string;
+  userId: string;
   username: string;
   success: boolean;
   failReason: string;
@@ -100,12 +110,14 @@ export interface LoginLog {
 }
 
 export interface SecurityEvent {
-  id: number;
+  id: string;
+  userId: string;
   username: string;
   eventType: string;
   riskLevel: RiskLevel;
   ip: string;
-  metadata: string;
+  userAgent: string;
+  metadataJson: string;
   createdAt: string;
 }
 
@@ -150,10 +162,13 @@ export interface FileAsset {
   ownerUserId: string;
   bizType: string;
   storageProvider: string;
+  bucket: string;
   objectKey: string;
   url: string;
   mimeType: string;
   sizeBytes: string;
+  checksum: string;
+  username?: string;
   status: number; // 1=正常 0=拦截
   createdAt: string;
   updatedAt: string;

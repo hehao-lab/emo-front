@@ -48,7 +48,9 @@ export async function fetchAnnouncements(params: {
   platform?: string;
   status?: number;
 }): Promise<AnnouncementListResponse> {
-  const { data } = await apiClient.get<AnnouncementListResponse>("/v1/admin/system/announcements", { params });
+  const { data } = await apiClient.get<AnnouncementListResponse>("/v1/admin/system/announcements", {
+    params: { ...params, filterStatus: params.status !== undefined },
+  });
   return data;
 }
 

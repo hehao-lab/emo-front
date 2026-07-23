@@ -231,7 +231,7 @@ export function UsersPage() {
             label="新密码"
             rules={[
               { required: true, message: "请输入新密码" },
-              { min: 6, message: "密码至少 6 位" },
+              { min: 8, message: "密码至少 8 位" },
             ]}
           >
             <Input.Password size="large" placeholder="输入新密码" autoComplete="new-password" />

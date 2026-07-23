@@ -18,8 +18,15 @@ export function LoginPage() {
   useEffect(() => {
     if (readToken()) {
       navigate("/", { replace: true });
+      return;
     }
-  }, [navigate]);
+    // 检查是否因 session 过期被弹回登录页
+    const reason = sessionStorage.getItem("auth:redirect");
+    if (reason) {
+      sessionStorage.removeItem("auth:redirect");
+      message.warning("登录已过期，请重新登录");
+    }
+  }, [navigate, message]);
 
   const onFinish = async (values: LoginForm) => {
     setLoading(true);
@@ -28,8 +35,12 @@ export function LoginPage() {
       message.success("登录成功");
       navigate("/", { replace: true });
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      message.error(msg || "登录失败，请检查手机号和密码");
+      console.error("[LoginPage] login error:", err);
+      // 优先提取 axios 错误响应中的业务消息
+      const axiosMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      // 其次使用 Error 的 message
+      const errMsg = err instanceof Error ? err.message : "";
+      message.error(axiosMsg || errMsg || "登录失败，请检查手机号和密码");
     } finally {
       setLoading(false);
     }
