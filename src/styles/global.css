@@ -418,6 +418,61 @@ a {
   background: #f8fafc;
 }
 
+.app-content-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.app-content-form {
+  max-width: 960px;
+}
+
+.app-content-heading,
+.app-content-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.app-content-heading {
+  margin-bottom: 18px;
+}
+
+.app-content-heading .ant-typography,
+.app-content-section-title .ant-typography {
+  margin: 0;
+}
+
+.app-content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+.app-content-section-title {
+  padding-top: 4px;
+  margin-bottom: 12px;
+}
+
+.app-content-section-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.app-content-section-editor {
+  padding: 16px 16px 0;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.app-content-section-header {
+  margin-bottom: 12px;
+}
+
 @media (max-width: 900px) {
   .login-panel {
     grid-template-columns: 1fr;
@@ -466,5 +521,14 @@ a {
   .table-toolbar .ant-input-search,
   .table-toolbar .ant-select {
     width: 100%;
+  }
+
+  .app-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-content-heading {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

@@ -3,6 +3,7 @@ import type { ColumnsType } from "antd/es/table";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
+import { AppContentManager } from "../components/AppContentManager";
 import { PlatformTag } from "../components/StatusTags";
 import {
   fetchConfigs,
@@ -356,6 +357,7 @@ export function SystemPage() {
     <div className="page-stack">
       <Card>
         <Tabs items={[
+          { key: "app-content", label: "App 页面", children: <AppContentManager /> },
           { key: "configs", label: "系统配置", children: <ConfigsTab /> },
           { key: "announcements", label: "公告", children: <AnnouncementsTab /> },
           { key: "versions", label: "版本", children: <VersionsTab /> },

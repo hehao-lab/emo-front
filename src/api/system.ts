@@ -23,8 +23,11 @@ export async function fetchConfigs(params: {
   keyword?: string;
   isPublic?: boolean;
 }): Promise<ConfigListResponse> {
-  const { data } = await apiClient.get<ConfigListResponse>("/v1/admin/system/configs", { params });
-  return data;
+  const { data } = await apiClient.get<Partial<ConfigListResponse>>("/v1/admin/system/configs", { params });
+  return {
+    configs: Array.isArray(data.configs) ? data.configs : [],
+    total: data.total || "0",
+  };
 }
 
 export async function createConfig(body: Partial<SystemConfig>): Promise<SystemConfig> {
