@@ -3,10 +3,15 @@ import axios from "axios";
 const TOKEN_KEY = "emo_admin_token";
 const REFRESH_KEY = "emo_admin_refresh";
 const PROFILE_KEY = "emo_admin_profile";
+const PROTOJSON_HEADERS = {
+  Accept: "application/protojson",
+  "Content-Type": "application/protojson",
+};
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "",
   timeout: 15000,
+  headers: PROTOJSON_HEADERS,
 });
 
 function camelCaseKey(key: string) {
@@ -79,6 +84,7 @@ apiClient.interceptors.response.use(
           const resp = await axios.post(
             `${import.meta.env.VITE_API_BASE_URL || ""}/v1/auth/refresh`,
             { refreshToken: refresh },
+            { headers: PROTOJSON_HEADERS },
           );
           let body = normalizeResponseData(resp.data);
           if (body && typeof body === "object" && "code" in body && body.code === 0 && "data" in body) {

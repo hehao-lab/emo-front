@@ -6,6 +6,12 @@ export interface ConfigListResponse {
   total: string;
 }
 
+export interface PublicConfig {
+  key: string;
+  valueJson: string;
+  description: string;
+}
+
 export interface AnnouncementListResponse {
   announcements: Announcement[];
   total: string;
@@ -44,6 +50,11 @@ export async function deleteConfig(id: string) {
   await apiClient.delete(`/v1/admin/system/configs/${id}`);
 }
 
+export async function fetchPublicConfigs(): Promise<PublicConfig[]> {
+  const { data } = await apiClient.get<{ configs?: PublicConfig[] }>("/v1/system/configs/public");
+  return Array.isArray(data.configs) ? data.configs : [];
+}
+
 // Announcements
 export async function fetchAnnouncements(params: {
   page?: number;
@@ -79,6 +90,11 @@ export async function fetchVersions(params: {
 }): Promise<VersionListResponse> {
   const { data } = await apiClient.get<VersionListResponse>("/v1/admin/system/versions", { params });
   return data;
+}
+
+export async function fetchLatestVersion(params: { platform: Exclude<AppVersion["platform"], "all"> }): Promise<AppVersion | null> {
+  const { data } = await apiClient.get<Partial<AppVersion>>("/v1/system/versions/latest", { params });
+  return data.version ? data as AppVersion : null;
 }
 
 export async function createVersion(body: Partial<AppVersion>): Promise<AppVersion> {
